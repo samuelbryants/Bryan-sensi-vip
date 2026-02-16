@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GERADOR VIP DE SENSI</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:15px;
+    color:white;
+}
+
+/* LOGIN */
+.login{
+    background: rgba(0,0,0,0.95);
+    padding:20px;
+    border-radius:20px;
+    width:100%;
+    max-width:300px;
+    box-shadow:0 0 25px #00ffcc;
+    text-align:center;
+}
+
+/* APP */
+.container{
+    display:none;
+    background: rgba(0,0,0,0.95);
+    padding:20px;
+    border-radius:20px;
+    width:100%;
+    max-width:330px;
+    box-shadow:0 0 25px #00ffcc;
+}
+
+/* INPUTS E SELECT */
+input, select{
+    width:100%;
+    padding:10px;
+    margin:8px 0 12px 0;
+    border:none;
+    border-radius:10px;
+    box-sizing:border-box;
+}
+
+/* BOTÕES */
+button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:12px;
+    background:#00ffcc;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#00ccaa;
+}
+
+/* PAINEL ADMIN */
+.adminPanel{
+    display:none;
+    margin-top:15px;
+    background:#111;
+    padding:10px;
+    border-radius:12px;
+    font-size:13px;
+}
+
+/* LISTA KEYS */
+.keyItem{
+    background:#222;
+    padding:6px;
+    margin-top:6px;
+    border-radius:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    gap:5px;
+    word-break:break-word;
+}
+
+/* RESULTADO */
+.resultado{
+    margin-top:15px;
+    background:#111;
+    padding:12px;
+    border-radius:12px;
+    font-size:14px;
+}
+
+.testeBtn{
+    margin-top:10px;
+    background:#ff4444;
+}
+
+.testeBtn:hover{
+    background:#cc0000;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginBox">
+    <h2>🔐 LOGIN VIP</h2>
+    <input type="text" id="keyInput" placeholder="Digite sua Key">
+    <button onclick="verificarKey()">ENTRAR</button>
+    <p id="erro" style="color:red;"></p>
+</div>
+
+<!-- APP -->
+<div class="container" id="appBox">
+    <h1 style="text-align:center;">GERADOR VIP DE SENSI</h1>
+
+    <label>Escolha o Celular:</label>
+    <select id="celular">
+        <option value="Samsung">Samsung</option>
+        <option value="Motorola">Motorola</option>
+        <option value="Xiaomi">Xiaomi</option>
+    </select>
+
+    <label>Tipo de Sensibilidade:</label>
+    <select id="tipoSensi">
+        <option value="alta">Alta</option>
+        <option value="media">Média</option>
+        <option value="baixa">Baixa</option>
+    </select>
+
+    <button onclick="criarSensi()">CRIAR SENSI</button>
+
+    <button class="testeBtn" onclick="testarFreeFire()">
+        TESTAR NO FREE FIRE
+    </button>
+
+    <div class="resultado" id="resultado"></div>
+
+    <!-- PAINEL ADMIN -->
+    <div class="adminPanel" id="adminPanel">
+        <h3 style="text-align:center;">👑 PAINEL DO DONO</h3>
+
+        <input type="text" id="novaKey" placeholder="Nome da nova key">
+
+        <input type="date" id="dataValidade">
+
+        <button onclick="criarNovaKey()">CRIAR KEY</button>
+
+        <div id="listaKeys"></div>
+    </div>
+</div>
+
+<script>
+const keyDono = "samuel1405@";
+const keyPermanente = "keyteste1405";
+
+function carregarKeys(){
+    let keys = JSON.parse(localStorage.getItem("keys") || "{}");
+    if(!keys[keyPermanente]){
+        keys[keyPermanente] = "permanente";
+        localStorage.setItem("keys", JSON.stringify(keys));
+    }
+    return keys;
+}
+
+function salvarKeys(keys){
+    localStorage.setItem("keys", JSON.stringify(keys));
+}
+
+function verificarKey(){
+    let keyDigitada = document.getElementById("keyInput").value;
+    let erro = document.getElementById("erro");
+
+    if(keyDigitada === keyDono){
+        abrirApp(true);
+        return;
+    }
+
+    let keys = carregarKeys();
+
+    if(!keys[keyDigitada]){
+        erro.innerText = "Key inválida!";
+        return;
+    }
+
+    if(keys[keyDigitada] === "permanente"){
+        abrirApp(false);
+        return;
+    }
+
+    let hoje = new Date().toISOString().split("T")[0];
+
+    if(hoje > keys[keyDigitada]){
+        erro.innerText = "Key expirada!";
+        return;
+    }
+
+    abrirApp(false);
+}
+
+function abrirApp(isDono){
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("appBox").style.display="block";
+    if(isDono){
+        document.getElementById("adminPanel").style.display="block";
+        atualizarLista();
+    }
+}
+
+function criarNovaKey(){
+    let nome = document.getElementById("novaKey").value;
+    let validade = document.getElementById("dataValidade").value;
+
+    if(!nome || !validade){
+        alert("Preencha tudo!");
+        return;
+    }
+
+    let keys = carregarKeys();
+    keys[nome] = validade;
+    salvarKeys(keys);
+    atualizarLista();
+    document.getElementById("novaKey").value="";
+}
+
+function atualizarLista(){
+    let keys = carregarKeys();
+    let lista = document.getElementById("listaKeys");
+    lista.innerHTML="";
+
+    for(let nome in keys){
+
+        let validadeTexto = keys[nome] === "permanente"
+            ? "PERMANENTE 🔥"
+            : "até " + keys[nome];
+
+        lista.innerHTML += `
+            <div class="keyItem">
+                ${nome} (${validadeTexto})
+                ${nome !== keyPermanente
+                    ? `<button onclick="deletarKey('${nome}')" style="background:red;width:60px;">DEL</button>`
+                    : `<span style="color:lime;">FIXA</span>`
+                }
+            </div>
+        `;
+    }
+}
+
+function deletarKey(nome){
+    if(nome === keyPermanente){
+        alert("Essa key é permanente!");
+        return;
+    }
+    let keys = carregarKeys();
+    delete keys[nome];
+    salvarKeys(keys);
+    atualizarLista();
+}
+
+/* ===== GERADOR ===== */
+
+function random(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function criarSensi(){
+
+    let celular = document.getElementById("celular").value;
+    let tipo = document.getElementById("tipoSensi").value;
+
+    let dpi;
+    let minSensi, maxSensi;
+
+    if(tipo === "alta"){
+        dpi = random(900,1440);
+        minSensi = 170;
+        maxSensi = 200;
+    }
+    else if(tipo === "media"){
+        dpi = random(600,800);
+        minSensi = 110;
+        maxSensi = 160;
+    }
+    else{
+        dpi = random(300,500);
+        minSensi = 170;
+        maxSensi = 200;
+    }
+
+    let geral = random(minSensi,maxSensi);
+    let redDot = random(minSensi,maxSensi);
+    let mira2x = random(minSensi,maxSensi);
+    let mira4x = random(minSensi,maxSensi);
+    let awm = random(minSensi,maxSensi);
+    let olhadinha = random(minSensi,maxSensi);
+
+    document.getElementById("resultado").innerHTML = `
+        📱 Celular: ${celular} <br>
+        🎯 SENSI: ${tipo.toUpperCase()} <br>
+        ⚙ DPI GERADA: ${dpi} <br><br>
+        🔥 SENSI PERFEITA: <br>
+        ⚙┋GERAL: ${geral} <br>
+        🔴┋RED DOT: ${redDot} <br>
+        🎯┋MIRA 2X: ${mira2x} <br>
+        🎯┋MIRA 4X: ${mira4x} <br>
+        ☠️┋AWM: ${awm} <br>
+        👀┋OLHADINHA: ${olhadinha}
+    `;
+}
+
+function testarFreeFire(){
+    window.location.href = "intent://#Intent;package=com.dts.freefireth;end";
+    setTimeout(function(){
+        window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
+    },2000);
+}
+</script>
+
+
+</body>
+</html>
