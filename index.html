@@ -9,13 +9,24 @@
 body{
     margin:0;
     font-family:Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    background:#000;
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
     padding:15px;
     color:white;
+    overflow:hidden;
+}
+
+/* PARTICLES */
+#particles{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
 }
 
 /* LOGIN */
@@ -40,7 +51,6 @@ body{
     box-shadow:0 0 25px #00ffcc;
 }
 
-/* INPUTS E SELECT */
 input, select{
     width:100%;
     padding:10px;
@@ -50,7 +60,6 @@ input, select{
     box-sizing:border-box;
 }
 
-/* BOTÕES */
 button{
     width:100%;
     padding:13px;
@@ -66,7 +75,15 @@ button:hover{
     background:#00ccaa;
 }
 
-/* PAINEL ADMIN */
+.testeBtn{
+    margin-top:10px;
+    background:#ff4444;
+}
+
+.testeBtn:hover{
+    background:#cc0000;
+}
+
 .adminPanel{
     display:none;
     margin-top:15px;
@@ -76,7 +93,6 @@ button:hover{
     font-size:13px;
 }
 
-/* LISTA KEYS */
 .keyItem{
     background:#222;
     padding:6px;
@@ -86,11 +102,8 @@ button:hover{
     justify-content:space-between;
     align-items:center;
     font-size:12px;
-    gap:5px;
-    word-break:break-word;
 }
 
-/* RESULTADO */
 .resultado{
     margin-top:15px;
     background:#111;
@@ -98,19 +111,12 @@ button:hover{
     border-radius:12px;
     font-size:14px;
 }
-
-.testeBtn{
-    margin-top:10px;
-    background:#ff4444;
-}
-
-.testeBtn:hover{
-    background:#cc0000;
-}
 </style>
 </head>
 
 <body>
+
+<canvas id="particles"></canvas>
 
 <!-- LOGIN -->
 <div class="login" id="loginBox">
@@ -146,23 +152,20 @@ button:hover{
 
     <div class="resultado" id="resultado"></div>
 
-    <!-- PAINEL ADMIN -->
     <div class="adminPanel" id="adminPanel">
         <h3 style="text-align:center;">👑 PAINEL DO DONO</h3>
-
         <input type="text" id="novaKey" placeholder="Nome da nova key">
-
         <input type="date" id="dataValidade">
-
         <button onclick="criarNovaKey()">CRIAR KEY</button>
-
         <div id="listaKeys"></div>
     </div>
 </div>
 
 <script>
+/* ================= KEYS ================= */
+
 const keyDono = "samuel1405@";
-const keyPermanente = "keyteste1405";
+const keyPermanente = "samuekey2";
 
 function carregarKeys(){
     let keys = JSON.parse(localStorage.getItem("keys") || "{}");
@@ -239,7 +242,6 @@ function atualizarLista(){
     lista.innerHTML="";
 
     for(let nome in keys){
-
         let validadeTexto = keys[nome] === "permanente"
             ? "PERMANENTE 🔥"
             : "até " + keys[nome];
@@ -267,14 +269,13 @@ function deletarKey(nome){
     atualizarLista();
 }
 
-/* ===== GERADOR ===== */
+/* ================= GERADOR ================= */
 
 function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function criarSensi(){
-
     let celular = document.getElementById("celular").value;
     let tipo = document.getElementById("tipoSensi").value;
 
@@ -297,35 +298,91 @@ function criarSensi(){
         maxSensi = 200;
     }
 
-    let geral = random(minSensi,maxSensi);
-    let redDot = random(minSensi,maxSensi);
-    let mira2x = random(minSensi,maxSensi);
-    let mira4x = random(minSensi,maxSensi);
-    let awm = random(minSensi,maxSensi);
-    let olhadinha = random(minSensi,maxSensi);
-
     document.getElementById("resultado").innerHTML = `
-        📱 Celular: ${celular} <br>
-        🎯 SENSI: ${tipo.toUpperCase()} <br>
-        ⚙ DPI GERADA: ${dpi} <br><br>
-        🔥 SENSI PERFEITA: <br>
-        ⚙┋GERAL: ${geral} <br>
-        🔴┋RED DOT: ${redDot} <br>
-        🎯┋MIRA 2X: ${mira2x} <br>
-        🎯┋MIRA 4X: ${mira4x} <br>
-        ☠️┋AWM: ${awm} <br>
-        👀┋OLHADINHA: ${olhadinha}
+        📱 Celular: ${celular}<br>
+        🎯 SENSI: ${tipo.toUpperCase()}<br>
+        ⚙ DPI: ${dpi}
     `;
 }
 
-function testarFreeFire(){
-    window.location.href = "intent://#Intent;package=com.dts.freefireth;end";
-    setTimeout(function(){
-        window.location.href = "https://play.google.com/store/apps/details?id=com.dts.freefireth";
-    },2000);
-}
-</script>
+/* ================= PARTICLES ================= */
 
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particlesArray = [];
+
+class Particle{
+    constructor(){
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = 3;
+        this.speedX = (Math.random() - 0.5);
+        this.speedY = (Math.random() - 0.5);
+    }
+    update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if(this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if(this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+    }
+    draw(){
+        ctx.fillStyle = "#00ffcc";
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+    }
+}
+
+function init(){
+    particlesArray=[];
+    for(let i=0;i<70;i++){
+        particlesArray.push(new Particle());
+    }
+}
+
+function connect(){
+    for(let a=0;a<particlesArray.length;a++){
+        for(let b=a;b<particlesArray.length;b++){
+            let dx=particlesArray[a].x-particlesArray[b].x;
+            let dy=particlesArray[a].y-particlesArray[b].y;
+            let dist=dx*dx+dy*dy;
+
+            if(dist<12000){
+                ctx.strokeStyle="rgba(0,255,204,0.2)";
+                ctx.lineWidth=1;
+                ctx.beginPath();
+                ctx.moveTo(particlesArray[a].x,particlesArray[a].y);
+                ctx.lineTo(particlesArray[b].x,particlesArray[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particlesArray.forEach(p=>{
+        p.update();
+        p.draw();
+    });
+    connect();
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+window.addEventListener("resize",()=>{
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    init();
+});
+</script>
 
 </body>
 </html>
