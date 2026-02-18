@@ -6,10 +6,12 @@
 <title>GERADOR VIP DE SENSI</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
 body{
     margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#000;
+    font-family:'Orbitron', sans-serif;
+    background: radial-gradient(circle at top, #1a0000, #000);
     display:flex;
     justify-content:center;
     align-items:center;
@@ -31,26 +33,29 @@ body{
 
 /* LOGIN */
 .login{
-    background: rgba(0,0,0,0.95);
+    background: linear-gradient(145deg,#111,#000);
     padding:20px;
     border-radius:20px;
     width:100%;
-    max-width:300px;
-    box-shadow:0 0 25px #00ffcc;
+    max-width:320px;
+    border:2px solid #ff3c00;
+    box-shadow:0 0 20px #ff3c00;
     text-align:center;
 }
 
 /* APP */
 .container{
     display:none;
-    background: rgba(0,0,0,0.95);
+    background: linear-gradient(145deg,#111,#000);
     padding:20px;
     border-radius:20px;
     width:100%;
-    max-width:330px;
-    box-shadow:0 0 25px #00ffcc;
+    max-width:350px;
+    border:2px solid #ff3c00;
+    box-shadow:0 0 25px #ff3c00;
 }
 
+/* INPUTS */
 input, select{
     width:100%;
     padding:10px;
@@ -58,43 +63,65 @@ input, select{
     border:none;
     border-radius:10px;
     box-sizing:border-box;
+    background:#1a1a1a;
+    color:#fff;
+    border:1px solid #ff3c00;
 }
 
+/* BOTÕES ESTILO FREE FIRE */
 button{
     width:100%;
     padding:13px;
     border:none;
     border-radius:12px;
-    background:#00ffcc;
+    background:linear-gradient(90deg,#ff3c00,#ff0000);
+    color:white;
     font-weight:bold;
     cursor:pointer;
     transition:0.3s;
+    box-shadow:0 0 10px #ff3c00;
 }
 
 button:hover{
-    background:#00ccaa;
+    transform:scale(1.05);
+    box-shadow:0 0 20px #ff0000;
 }
 
+/* BOTÃO TESTE */
 .testeBtn{
     margin-top:10px;
-    background:#ff4444;
+    background:linear-gradient(90deg,#ff0000,#990000);
 }
 
 .testeBtn:hover{
-    background:#cc0000;
+    box-shadow:0 0 20px red;
 }
 
+/* RESULTADO HUD STYLE */
+.resultado{
+    margin-top:15px;
+    background:#0d0d0d;
+    padding:15px;
+    border-radius:15px;
+    border:1px solid #ff3c00;
+    box-shadow:0 0 15px rgba(255,60,0,0.6);
+    font-size:14px;
+    line-height:1.6;
+}
+
+/* PAINEL DONO */
 .adminPanel{
     display:none;
     margin-top:15px;
-    background:#111;
-    padding:10px;
+    background:#0a0a0a;
+    padding:12px;
     border-radius:12px;
+    border:1px solid #ff3c00;
     font-size:13px;
 }
 
 .keyItem{
-    background:#222;
+    background:#1a0000;
     padding:6px;
     margin-top:6px;
     border-radius:8px;
@@ -102,15 +129,9 @@ button:hover{
     justify-content:space-between;
     align-items:center;
     font-size:12px;
+    border:1px solid #ff3c00;
 }
 
-.resultado{
-    margin-top:15px;
-    background:#111;
-    padding:12px;
-    border-radius:12px;
-    font-size:14px;
-}
 </style>
 </head>
 
@@ -283,39 +304,33 @@ function criarSensi(){
     let tipo = document.getElementById("tipoSensi").value;
 
     let dpi;
-    let base;
+    let baseMin, baseMax;
 
-    // SISTEMA INTELIGENTE BASEADO NO TIPO
     if(tipo === "alta"){
         dpi = random(900,1440);
-        base = random(185,195);
+        baseMin = 185;
+        baseMax = 200;
     }
     else if(tipo === "media"){
         dpi = random(600,800);
-        base = random(145,160);
+        baseMin = 150;
+        baseMax = 170;
     }
     else{
         dpi = random(300,500);
-        base = random(115,130);
+        baseMin = 170;
+        baseMax = 200;
     }
 
-    // AJUSTE PRA CAPA
-    let geral = base;
-    let redDot = base + random(3,6);
-    let mira2x = base - random(5,9);
-    let mira4x = base - random(10,15);
-    let awm = base - random(15,22);
-    let olhadinha = base + random(4,8);
+    let base = random(baseMin, baseMax);
 
-    // LIMITAR A 200
-    geral = Math.min(geral,200);
-    redDot = Math.min(redDot,200);
-    mira2x = Math.min(mira2x,200);
-    mira4x = Math.min(mira4x,200);
-    awm = Math.min(awm,200);
-    olhadinha = Math.min(olhadinha,200);
+    let geral = Math.min(Math.max(base,1),200);
+    let redDot = Math.min(Math.max(base+5,1),200);
+    let mira2x = Math.min(Math.max(base-8,1),200);
+    let mira4x = Math.min(Math.max(base-15,1),200);
+    let awm = Math.min(Math.max(base-22,1),200);
+    let olhadinha = Math.min(Math.max(base+6,1),200);
 
-    // EVITAR REPETIÇÃO
     let sensiAtual = `${geral}-${redDot}-${mira2x}-${mira4x}-${awm}-${olhadinha}`;
 
     if(sensiAtual === ultimaSensiGerada){
@@ -324,18 +339,51 @@ function criarSensi(){
 
     ultimaSensiGerada = sensiAtual;
 
+    function gerarCodigoHUD(tipo){
+        const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let codigo = "#FFHUD" + tipo;
+        for(let i=0;i<14;i++){
+            codigo += caracteres.charAt(Math.floor(Math.random()*caracteres.length));
+        }
+        return codigo;
+    }
+
+    let hud2 = gerarCodigoHUD("2");
+    let hud3 = gerarCodigoHUD("3");
+    let hud4 = gerarCodigoHUD("4");
+
     document.getElementById("resultado").innerHTML = `
         📱 Celular: ${celular}<br>
         🎯 Tipo: ${tipo.toUpperCase()}<br>
         ⚙ DPI: ${dpi}<br><br>
-        🔥 SENSI OTIMIZADA PRA CAPA:<br>
+        🔥 SENSI VIP BRABA:<br>
         GERAL: ${geral}<br>
         RED DOT: ${redDot}<br>
         MIRA 2X: ${mira2x}<br>
         MIRA 4X: ${mira4x}<br>
         AWM: ${awm}<br>
-        OLHADINHA: ${olhadinha}
+        OLHADINHA: ${olhadinha}<br><br>
+        🎮 HUD 2 DEDOS: ${hud2}<br>
+        🎮 HUD 3 DEDOS: ${hud3}<br>
+        🎮 HUD 4 DEDOS: ${hud4}
     `;
+    
+// SALVAR AUTOMATICAMENTE NO BANCO ONLINE
+      if(window.salvarNoBanco){
+        window.salvarNoBanco({
+        celular: celular,
+        tipo: tipo,
+        dpi: dpi,
+        geral: geral,
+        redDot: redDot,
+        mira2x: mira2x,
+        mira4x: mira4x,
+        awm: awm,
+        olhadinha: olhadinha,
+        data: new Date().toISOString()
+       });
+    }
+
 }
 
 
@@ -417,6 +465,35 @@ window.addEventListener("resize",()=>{
     init();
 });
 </script>
+    
+<!-- FIREBASE CONFIG PRONTA -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "COLE_AQUI_SUA_API_KEY",
+  authDomain: "COLE_AQUI_SEU_AUTH_DOMAIN",
+  projectId: "COLE_AQUI_SEU_PROJECT_ID",
+  storageBucket: "COLE_AQUI_SEU_STORAGE_BUCKET",
+  messagingSenderId: "COLE_AQUI_SEU_MESSAGING_SENDER_ID",
+  appId: "COLE_AQUI_SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// FUNÇÃO GLOBAL PARA SALVAR
+window.salvarNoBanco = async function(dados){
+    try{
+        await addDoc(collection(db, "sensisGeradas"), dados);
+        console.log("🔥 Sensi salva online!");
+    }catch(error){
+        console.error("Erro Firebase:", error);
+    }
+}
+</script>
+
 
 </body>
 </html>
