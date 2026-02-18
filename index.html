@@ -275,35 +275,69 @@ function random(min, max){
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+let ultimaSensiGerada = "";
+
 function criarSensi(){
+
     let celular = document.getElementById("celular").value;
     let tipo = document.getElementById("tipoSensi").value;
 
     let dpi;
-    let minSensi, maxSensi;
+    let base;
 
+    // SISTEMA INTELIGENTE BASEADO NO TIPO
     if(tipo === "alta"){
         dpi = random(900,1440);
-        minSensi = 170;
-        maxSensi = 200;
+        base = random(185,195);
     }
     else if(tipo === "media"){
         dpi = random(600,800);
-        minSensi = 110;
-        maxSensi = 160;
+        base = random(145,160);
     }
     else{
         dpi = random(300,500);
-        minSensi = 170;
-        maxSensi = 200;
+        base = random(115,130);
     }
+
+    // AJUSTE PRA CAPA
+    let geral = base;
+    let redDot = base + random(3,6);
+    let mira2x = base - random(5,9);
+    let mira4x = base - random(10,15);
+    let awm = base - random(15,22);
+    let olhadinha = base + random(4,8);
+
+    // LIMITAR A 200
+    geral = Math.min(geral,200);
+    redDot = Math.min(redDot,200);
+    mira2x = Math.min(mira2x,200);
+    mira4x = Math.min(mira4x,200);
+    awm = Math.min(awm,200);
+    olhadinha = Math.min(olhadinha,200);
+
+    // EVITAR REPETIÇÃO
+    let sensiAtual = `${geral}-${redDot}-${mira2x}-${mira4x}-${awm}-${olhadinha}`;
+
+    if(sensiAtual === ultimaSensiGerada){
+        return criarSensi();
+    }
+
+    ultimaSensiGerada = sensiAtual;
 
     document.getElementById("resultado").innerHTML = `
         📱 Celular: ${celular}<br>
-        🎯 SENSI: ${tipo.toUpperCase()}<br>
-        ⚙ DPI: ${dpi}
+        🎯 Tipo: ${tipo.toUpperCase()}<br>
+        ⚙ DPI: ${dpi}<br><br>
+        🔥 SENSI OTIMIZADA PRA CAPA:<br>
+        GERAL: ${geral}<br>
+        RED DOT: ${redDot}<br>
+        MIRA 2X: ${mira2x}<br>
+        MIRA 4X: ${mira4x}<br>
+        AWM: ${awm}<br>
+        OLHADINHA: ${olhadinha}
     `;
 }
+
 
 /* ================= PARTICLES ================= */
 
