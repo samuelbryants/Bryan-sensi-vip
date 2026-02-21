@@ -167,15 +167,6 @@ button:hover{
 
     <button onclick="criarSensi()">CRIAR SENSI</button>
 
-    <button class="testeBtn" onclick="testarFreeFire()">
-        TESTAR NO FREE FIRE
-        
-        <button onclick="salvarSensiAtual()">⭐</button>
-        
-        <button onclick="mostrarSensisSalvas()">📂</button>
-
-    </button>
-
     <div class="resultado" id="resultado"></div>
 
     <div class="adminPanel" id="adminPanel">
@@ -485,51 +476,98 @@ window.salvarNoBanco = async function(dados){
     }
 }
 </script>
+<script type="module">
 
-<script>
-// =============================
-// SALVAR SENSI ATUAL ⭐
-// =============================
-function salvarSensiAtual() {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, getDocs, collection, deleteDoc } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  if (!window.sensiAtual) {
-    alert("Gere uma sensi primeiro!");
-    return;
-  }
+// SUA CONFIG FIREBASE
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+};
 
-  let banco = JSON.parse(localStorage.getItem("bancoSensi")) || [];
-  banco.push(window.sensiAtual);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  localStorage.setItem("bancoSensi", JSON.stringify(banco));
+// ===============================
+// VERIFICAR KEY NO BANCO
+// ===============================
+window.verificarKeyFirebase = async function(keyDigitada){
 
-  alert("Sensi salva com sucesso ⭐");
-}
+    const docRef = doc(db, "keys", keyDigitada);
+    const docSnap = await getDoc(docRef);
 
-// =============================
-// MOSTRAR SENSIS SALVAS 📂
-// =============================
-function mostrarSensisSalvas() {
+    if(!docSnap.exists()){
+        document.getElementById("erro").innerText = "Key inválida!";
+        return;
+    }
 
-  let banco = JSON.parse(localStorage.getItem("bancoSensi")) || [];
+    const dados = docSnap.data();
 
-  if (banco.length === 0) {
-    alert("Nenhuma sensi salva ainda.");
-    return;
-  }
+    if(dados.tipo === "permanente"){
+        abrirApp(false);
+        return;
+    }
 
-  let lista = "<h3>SENSIS SALVAS 📂</h3>";
+    let hoje = new Date().toISOString().split("T")[0];
 
-  banco.forEach((s, i) => {
-    lista += `
-      <div style="margin:10px;padding:10px;background:#111;border-radius:8px;">
-        <b>Sensi ${i+1}</b><br>
-        ${Object.entries(s).map(([k,v]) => k + ": " + v).join("<br>")}
-      </div>
-    `;
-  });
+    if(hoje > dados.validade){
+        document.getElementById("erro").innerText = "Key expirada!";
+        return;
+    }
 
-  document.getElementById("resultado").innerHTML = lista;
-}
+    abrirApp(false);
+};
+
+// ===============================
+// CRIAR KEY NO BANCO
+// ===============================
+window.criarKeyFirebase = async function(nome, validade){
+
+    await setDoc(doc(db, "keys", nome), {
+        validade: validade,
+        tipo: "normal"
+    });
+
+    alert("🔥 Key criada e salva online!");
+};
+
+// ===============================
+// LISTAR KEYS (PAINEL DONO)
+// ===============================
+window.listarKeysFirebase = async function(){
+
+    const querySnapshot = await getDocs(collection(db, "keys"));
+    let lista = document.getElementById("listaKeys");
+    lista.innerHTML = "";
+
+    querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+
+        lista.innerHTML += `
+            <div style="margin-top:5px">
+                ${docSnap.id} - ${data.tipo === "permanente" ? "PERMANENTE 🔥" : data.validade}
+                <button onclick="deletarKeyFirebase('${docSnap.id}')" style="background:red;width:60px;">DEL</button>
+            </div>
+        `;
+    });
+};
+
+// ===============================
+// DELETAR KEY
+// ===============================
+window.deletarKeyFirebase = async function(nome){
+    await deleteDoc(doc(db, "keys", nome));
+    alert("Key deletada!");
+    listarKeysFirebase();
+};
+
 </script>
 
 </body>
