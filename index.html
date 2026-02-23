@@ -525,49 +525,6 @@ window.verificarKeyFirebase = async function(keyDigitada){
     abrirApp(false);
 };
 
-// ===============================
-// CRIAR KEY NO BANCO
-// ===============================
-window.criarKeyFirebase = async function(nome, validade){
-
-    await setDoc(doc(db, "keys", nome), {
-        validade: validade,
-        tipo: "normal"
-    });
-
-    alert("🔥 Key criada e salva online!");
-};
-
-// ===============================
-// LISTAR KEYS (PAINEL DONO)
-// ===============================
-window.listarKeysFirebase = async function(){
-
-    const querySnapshot = await getDocs(collection(db, "keys"));
-    let lista = document.getElementById("listaKeys");
-    lista.innerHTML = "";
-
-    querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-
-        lista.innerHTML += `
-            <div style="margin-top:5px">
-                ${docSnap.id} - ${data.tipo === "permanente" ? "PERMANENTE 🔥" : data.validade}
-                <button onclick="deletarKeyFirebase('${docSnap.id}')" style="background:red;width:60px;">DEL</button>
-            </div>
-        `;
-    });
-};
-
-// ===============================
-// DELETAR KEY
-// ===============================
-window.deletarKeyFirebase = async function(nome){
-    await deleteDoc(doc(db, "keys", nome));
-    alert("Key deletada!");
-    listarKeysFirebase();
-};
-
 </script>
 
 </body>
